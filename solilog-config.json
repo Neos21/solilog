@@ -1,0 +1,5 @@
+{
+  "credential"        : "CREDENTIAL",
+  "postDirectoryPath" : "../PATH/TO/POST-FILES-DIRECTORY",
+  "postFileNamePrefix": "solilog-"
+}
