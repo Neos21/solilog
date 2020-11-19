@@ -2,7 +2,7 @@
 
 PHP 製のオレオレ・マイクロ・ブログ。[Neo's PHP Micro Blog](https://github.com/Neos21/neos-php-micro-blog) の焼き直し。
 
-__[Demo Website](https://neos21-oci.cf/solilog)__
+__[Enter Demo Site](https://neos21-oci.cf/solilog)__
 
 - 特徴
     - パスワード認証により自分だけが投稿できる、オリジナルの簡易マイクロ・ブログ
@@ -26,16 +26,6 @@ __[Demo Website](https://neos21-oci.cf/solilog)__
     - `http://example.com/solilog.html?credential=【設定した管理者用パスワード】` にアクセスすれば投稿フォームが表示され、管理者が投稿・削除を行える管理者モードになる
 
 
-## Author
-
-[Neo](http://neo.s21.xrea.com/)
-
-
 ## Links
 
-- [Neo's World](http://neo.s21.xrea.com/)
-- [Corredor](https://neos21.hatenablog.com/)
-- [Murga](https://neos21.hatenablog.jp/)
-- [El Mylar](https://neos21.hateblo.jp/)
-- [Neo's GitHub Pages](https://neos21.github.io/)
-- [GitHub - Neos21](https://github.com/Neos21/)
+- [Neo's World](https://neos21.net/)
