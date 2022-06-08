@@ -56,10 +56,6 @@ html {
   text-align: right;
 }
 
-#main {
-  display: none;  /* For First Look */
-}
-
 #post-form {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -136,6 +132,12 @@ function showPostForm() {
       <input id="post-submit" type="button" value="投稿" tabindex="2" onclick="post()">
     </div>
   `);
+  // Ctrl Cmd + Enter
+  getId('post-text').addEventListener('keydown', (event) => {
+    if((event.ctrlKey || event.metaKey) && event.code === 'Enter') {  // event.keyCode === 13
+      post();
+    }
+  });
 }
 
 /** 投稿する */
@@ -178,6 +180,7 @@ async function post() {
 /** アーカイブ一覧を取得する */
 async function loadList() {
   try {
+    getId('archives').innerHTML = '<span class="warning">Loading...</span>';
     const response = await fetch(apiListUrl);
     const json = await response.json();
     console.log('Load List : Response', json);
@@ -205,6 +208,9 @@ async function loadList() {
 /** 投稿を読み込み表示する */
 async function loadPosts(yearMonth) {
   try {
+    getId('title').innerHTML = `Posts${yearMonth ? ' : ' + yearMonth : ''}`;
+    getId('body').innerHTML = '<span class="warning">Loading...</span>';
+    
     const showUrl = apiShowUrl + (yearMonth ? `?t=${yearMonth}` : '');
     const response = await fetch(showUrl);
     const json = await response.json();
@@ -214,10 +220,10 @@ async function loadPosts(yearMonth) {
       console.warn('Load Posts : Response Error');
       getId('title').innerHTML = 'Posts : Response Error';
       getId('body').innerHTML = `<span class="error">${json.error}</span>`;
-      getId('main').style.display = 'block';
       return;
     }
     
+    // 正式なタイトルに変える
     getId('title').innerHTML = `Posts : ${json.t}`;
     
     // URL を書き換える
@@ -240,8 +246,6 @@ async function loadPosts(yearMonth) {
       return html;
     }).join('') + '</dl>';
     
-    getId('main').style.display = 'block';
-    
     const hash = location.hash.replace((/^#/u), '');
     if(hash && getId(hash)) {
       getId(hash).scrollIntoView({ behavior: 'smooth' });
@@ -251,7 +255,6 @@ async function loadPosts(yearMonth) {
     console.error('Load Posts : Error', error);
     getId('title').innerHTML = 'Posts : Error';
     getId('body').innerHTML = `<span class="error">${error}</span>`;
-    getId('main').style.display = 'block';
   }
 }
 
@@ -299,9 +302,8 @@ function onClickHash() {
   console.log('On Click Hash : Replace URL', replacedUrl);
 }
 
-/** ヘッダリンク */
+/** ヘッダリンク : 常に最新月に遷移する */
 function moveToIndex() {
-  const params = [...new URLSearchParams(location.search)].reduce((acc, pair) => ({...acc, [pair[0]]: pair[1]}), {});
   loadPosts();
 }
 
@@ -317,13 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   
   loadList();
-  
-  if(params.t) {
-    loadPosts(params.t);
-  }
-  else {
-    loadPosts();
-  }
+  loadPosts(params.t);  // Or Undefined
 });
 
     </script>
