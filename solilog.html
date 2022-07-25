@@ -14,7 +14,7 @@ html {
 
 #post-text,
 #posts dt a,
-#archives li a {
+#archives li {
   font-family: var(--nn-font-family-monospace);
 }
 
@@ -97,6 +97,16 @@ html {
 
 #archives {
   margin: var(--nn-space-default) 0;
+}
+
+#archives ul {
+  padding-left: 0;
+  font-size: .85rem;
+  list-style: none;
+}
+
+.colon {
+  margin: 0 .2rem;
 }
 
 .warning {
@@ -195,8 +205,27 @@ async function loadList() {
       return;
     }
     
+    const yearMonths = [];
+    json.list.forEach(yyyyMm => {  // 'YYYY-MM'
+      const yyyy = yyyyMm.slice(0, 4);
+      const mm   = yyyyMm.slice(-2);
+      const targetYear = yearMonths.find(yearMonth => yearMonth.year === yyyy);
+      if(targetYear == null) {
+        yearMonths.push({ year: yyyy, months: [mm] });
+      }
+      else {
+        targetYear.months.push(mm);
+      }
+    });
+    // Sort Old Month To New Month
+    yearMonths.forEach(yearMonth => yearMonth.months.sort((monthA, monthB) => monthA < monthB ? -1 : monthA > monthB ? 1 : 0));
+    // Sort New Year To Old Year
+    yearMonths.sort((yearMonthA, yearMonthB) => yearMonthA.year < yearMonthB.year ? 1 : yearMonthA.year > yearMonthB.year ? -1 : 0);
     getId('archives').innerHTML = '<ul>'
-      + json.list.map(yearMonth => `<li><a href="#" onclick="loadPosts('${yearMonth}')">${yearMonth}</a></li>`).join('')
+      + yearMonths.map(yearMonth => `<li>${yearMonth.year}<span class="colon">:</span>`
+        + yearMonth.months.map(month => `<a href="#" onclick="loadPosts('${yearMonth.year}-${month}')">${month}</a>`).join(' ')
+        + '</li>'
+        ).join('')
       + '</ul>';
   }
   catch(error) {
