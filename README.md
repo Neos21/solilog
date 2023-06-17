@@ -14,10 +14,12 @@ __[Enter Demo Site](https://neos21-oci.cf/solilog)__
 - 構成
     - `solilog.html` : フロントエンド。各 API にアクセスする。API へのアクセスパスを `const` で定義してある
     - `solilog-config.json` : 各 API が参照する設定ファイル。パスワード、投稿ファイルの保管先などを指定する
-    - `solilog-list.json` : 投稿ファイルがある年月の一覧を返す API。各 API 用の PHP ファイルは冒頭で `solilog-config.json` へのパスを定義してある
-    - `solilog-show.json` : 指定の年月の投稿ファイルを返す API
-    - `solilog-admin-post.json` : 投稿処理を行う管理者用の API
-    - `solilog-admin-remove.json` : 指定の投稿を削除する管理者用の API
+    - `solilog-list.php` : 投稿ファイルがある年月の一覧を返す API。各 API 用の PHP ファイルは冒頭で `solilog-config.json` へのパスを定義してある
+    - `solilog-show.php` : 指定の年月の投稿ファイルを返す API
+    - `solilog-admin-post.php` : 投稿処理を行う管理者用の API
+    - `solilog-admin-remove.php` : 指定の投稿を削除する管理者用の API
+    - `search/index.html` : 検索ページのフロントエンド。API へのアクセスパスを `const` で定義してある
+    - `search/search.php` : 検索を行う API
 - 導入
     - PHP が動作するサーバに上のファイル群を配置する
     - `solilog-config.json` の `credential` を任意の文字列に変更する (管理者用パスワード)
