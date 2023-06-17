@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Solilog - Search</title>
+    <link rel="icon" href="/favicon.ico">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@neos21/neos-normalize@2.0.1/neos-normalize.min.css">
+    <style>
+
+html {
+  overflow-x: hidden;
+  word-break: break-all;
+}
+
+#search-query,
+#posts dt a {
+  font-family: var(--nn-font-family-monospace);
+}
+
+[type="button"] {
+  outline: 0;
+  color: inherit;
+}
+
+#container {
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+#header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  font-weight: bold;
+}
+
+#header a,
+#posts dt a,
+#to-top a {
+  color: inherit;
+  text-decoration: none;
+}
+
+#header a:hover,
+#header a:active,
+#posts dt a:hover,
+#posts dt a:active,
+#to-top a:hover,
+#to-top a:active {
+  text-decoration: underline;
+}
+
+#footer p,
+#to-bottom,
+#to-top {
+  text-align: right;
+}
+
+#search-form {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  margin: var(--nn-space-default) 0;
+  border: 1px solid var(--nn-colour-grey-default);
+  border-radius: var(--nn-border-radius-default);
+}
+
+#search-query {
+  outline: 0;
+  border: 0;
+  border-radius: 0;
+  font-size: 16px;  /* To Prevent Zoom In iOS */
+  line-height: 1;
+  background: transparent;
+}
+
+#search-submit {
+  border-width: 0 0 0 1px;
+  border-radius: 0 var(--nn-border-radius-default) var(--nn-border-radius-default) 0;
+}
+
+#posts dt {
+  margin: var(--nn-space-default) 0 0;
+  font-size: .85rem;
+  font-weight: normal;
+}
+
+#posts dd {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.warning {
+  color: #c90;
+}
+
+.error {
+  color: #f00;
+}
+
+    </style>
+    <script>
+
+// 各 API のパス
+const apiSearchUrl = './search.php';
+
+/** ID の要素を返す */
+function getId(id) {
+  return document.getElementById(id);
+}
+
+/** 検索する */
+async function search() {
+  try {
+    const query = getId('search-query').value.trim();
+    if(!query) {
+      console.warn('Search : No Query');
+      getId('body').innerHTML = '<span class="warning">No Query</span>';
+      return;
+    }
+    
+    getId('body').innerHTML = '<span class="warning">Searching...</span>';
+    
+    const response = await fetch(apiSearchUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        q: query
+      })
+    });
+    const json = await response.json();
+    console.log('Search : Response', json);
+    
+    if(json.error) {
+      console.warn('Search : Response Error');
+      alert('Search : Response Error : ' + json.error);
+      return;
+    }
+    if(json.results == null || json.results.length === 0) {
+      console.warn('Search : Results Not Found');
+      getId('body').innerHTML = '<span class="warning">Results Not Found</span>';
+      return;
+    }
+    
+    showResults(json.results);
+  }
+  catch(error) {
+    console.error('Search : Error', error);
+    alert('Search : Error : ' + error);
+  }
+}
+
+/** 検索結果を表示する */
+function showResults(results) {
+  getId('body').innerHTML = '<dl id="posts">' + results
+    .map((line) => {
+      if(line.match((/^\d{4}-\d{2}\.json-    "time": "/u))) {
+        const yearMonth = line.match((/^(\d{4}-\d{2})\.json-/u))[1];
+        const dateTime = line.match((/\.json-    "time": "(.*)",$/u))[1];
+        const id = 'post-' + dateTime.replace(' ', '-').replace((/:/gu), '-');
+        return `<dt><a href="../?t=${yearMonth}#${id}">${dateTime}</a></dt>`;
+      }
+      if(line.match((/^\d{4}-\d{2}\.json:    "text": "/u))) {
+        const rawText = line.match((/\.json:    "text": "(.*)"/u))[1];
+        const text = rawText
+          .replace((/\\\//gu), '/')
+          .replace((/\\n/gu), '<br>')
+          .replace((/(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig), '<a href="$1" target="_blank">$1</a>');
+        return `<dd>${text}</dd>`;
+      }
+      return null;
+    })
+    .filter((line) => line != null)
+    .join('') + '</dl>';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Ctrl Cmd + Enter
+  getId('search-query').addEventListener('keydown', (event) => {
+    if((event.ctrlKey || event.metaKey) && event.code === 'Enter') {  // event.keyCode === 13
+      search();
+    }
+  });
+  
+  // Init
+  getId('body').innerHTML = 'Please Input Query';
+  
+  // Initial Search
+  const params = [...new URLSearchParams(location.search)].reduce((acc, pair) => ({...acc, [pair[0]]: pair[1]}), {});
+  if(params.q) {
+    getId('search-query').value = params.q;
+    search();
+  }
+});
+
+    </script>
+  </head>
+  <body>
+    <div id="container">
+      <header id="header">
+        <div id="header-title"><a href="../">Solilog</a></div>
+        <div id="to-bottom"><a href="#footer">▼</a></div>
+      </header>
+      <main id="main">
+        <h1 id="title">Search</h1>
+        <div id="search-form">
+          <input id="search-query" type="text" placeholder="Query" tabindex="1">
+          <input id="search-submit" type="button" value="検索" tabindex="2" onclick="search()">
+        </div>
+        <div id="body">Please Enable JavaScript</div>
+      </main>
+      <footer id="footer">
+        <hr>
+        <p><a href="https://github.com/Neos21/solilog">GitHub</a> | <a href="https://neos21.net/">Neo's World</a></p>
+        <div id="to-top"><a href="#">▲</a></div>
+      </footer>
+    </div>
+  </body>
+</html>

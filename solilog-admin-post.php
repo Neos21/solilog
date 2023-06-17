@@ -51,6 +51,11 @@ function isValidParameter() {
     return false;
   }
   
+  if(getParameter('text') === 'about:blank') {
+    responseError('Invalid Text');
+    return false;
+  }
+  
   return true;
 }
 
@@ -110,6 +115,11 @@ function isValidCredential($credential) {
     responseError('Invalid Credential');
     return false;
   }
+  // 本文チェック
+  if(strpos(getParameter('text'), $credential) !== false) {
+    responseError('Invalid Text');
+    return false;
+  }
   
   return true;
 }
@@ -159,9 +169,16 @@ function writePost($postDirectoryPath, $postFileNamePrefix) {
     return str_repeat(' ', strlen($spaces[0]) / 2);
   }, json_encode($posts, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)) . "\n";
   
+  // null チェックしておく
+  if(is_null($newPostsText)) {
+    responseError('Failed To Make Post File. New Posts Text Is Null');
+    return false;
+  }
+  
   // ファイルに上書き保存する (ファイルが存在しない場合は新規作成になる)
   // @ を先頭に付けるとエラーメッセージの出力を抑止できる
-  $result = @file_put_contents($postFilePath, $newPostsText);
+  //$result = @file_put_contents($postFilePath, $newPostsText);
+  $result = file_put_contents($postFilePath, $newPostsText);
   if(!$result) {
     responseError('Failed To Write Post File');
     return false;
